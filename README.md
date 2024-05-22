@@ -7,3 +7,4 @@ Homeworks are optional. The project on the other hand is mandatory if you want a
 
 Running all of this in a Mac.
 
+NYC data from [here](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
