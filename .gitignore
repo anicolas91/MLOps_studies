@@ -1,2 +1,7 @@
 *.parquet
 *.bin
+*.b
+data/
+models/
+*.DS_Store
+02-experiment-tracking/mlruns/
