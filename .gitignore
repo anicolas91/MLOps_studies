@@ -4,4 +4,9 @@
 data/
 models/
 *.DS_Store
+*.db
 02-experiment-tracking/mlruns/
+02-experiment-tracking/homework/artifacts_local/
+02-experiment-tracking/homework/mlruns/
+02-experiment-tracking/homework/output/
+
