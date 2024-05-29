@@ -4,9 +4,13 @@
 
 What is the version of mage we run?
 
+### A: Version 0.9.70
+
 ## Q2. Creating a project
 
 How many lines are in the created `metadata.yaml` file?
+
+### A: freshly after creating the project, we have 55 lines of code.
 
 ## Q3. Creating a pipeline
 
@@ -27,4 +31,3 @@ Use the linear regression model to  train the data. So
 What is the intercept of the model?
 
 ## Q6. Register the model
-
