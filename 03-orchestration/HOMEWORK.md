@@ -40,3 +40,12 @@ What is the intercept of the model?
 - for gren taxis on jan 2023, the lr fit intercept is 21.49
 
 ## Q6. Register the model
+
+Find the logged model, and find MLModel file. What's the size of the model? (model_size_bytes field):
+
+### A: the pickle size of the fitted model is 5kb (4,542 bites)
+
+#### NOTE: to get this running in mage, we needed to set the following:
+
+- on the pipeline: mlflow.set_tracking_uri("http://mlflow:5000")
+- on the browser: we visit 127.0.01:5000 (or localhost:5000, its the same)
