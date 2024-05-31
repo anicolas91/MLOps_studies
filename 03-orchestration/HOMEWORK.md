@@ -35,16 +35,14 @@ Use the linear regression model to  train the data. So
 
 What is the intercept of the model?
 
-### A: for yellow taxis on march 2023, the lr fit intercept is 23.85
+### A: for yellow taxis on march 2023, the linear regression fit intercept using only dropoff+pickup locations is 24.778
 
-- for yellow taxis on jan 2023, the lr fit intercept is 21.84
-- for gren taxis on jan 2023, the lr fit intercept is 21.49
 
 ## Q6. Register the model
 
 Find the logged model, and find MLModel file. What's the size of the model? (model_size_bytes field):
 
-### A: the pickle size of the fitted model is 5kb (4,542 bites)
+### A: the pickle size of the fitted model is 5kb (4,534 bites)
 
 #### NOTE: to get this running in mage, we needed to set the following:
 
