@@ -17,7 +17,7 @@ def prepare_features(ride):
 def predict(features):
     X = dv.transform(features)
     preds = model.predict(X)
-    return preds[0] 
+    return float(preds[0])
 # note that the system wont print on json a list, it has to be the actual value
 
 # start a flask application
