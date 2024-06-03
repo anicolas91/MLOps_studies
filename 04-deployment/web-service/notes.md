@@ -39,8 +39,84 @@ Note that the url to request will be, given say port `9696`:
 http://localhost:9696/predict
 ```
 
-## 4. we package everything into docker
+### NOTES
+#### Using gunicorn
 
+Flask is only for development, for production/deployment use gunicorn
+```bash
+ pipenv install gunicorn
+```
+
+and bind the address with:
+```bash
+gunicorn --bind=0.0.0.0:9696 predict:app
+```
+you basically are saying the address on what this runs `0.0.0.0:9696`, and to go to the `predict` module and search for the app named `app`
+
+#### Installing packages that are only used during development
+When we run tests such as `tests.py` we use the `requests` library, which is not necessary for the `predict.py` main python script.
+
+We can install this library and specify that this library is only available during development via:
+
+```bash
+pipenv install --dev requests
+```
+
+Make sure to be on your pipenv `web-services` already.
+
+## 4. we package everything into docker
+- We create a `Dockerfile` and establish the python image to download, usually ask for the slim version:
+  ```Docker
+  FROM python:3.9.6-slim
+  ```
+- We update pip
+  ```Docker
+  RUN pip install -U pip
+  ```
+- We install pipenv so we can run the pipfiles
+  ```Docker
+  RUN pip install pipenv
+  ```
+- We create a folder called `app` and move in there
+  ```Docker
+  WORKDIR /app
+  ```
+- We copy our pipfiles to the docker image (current directory)
+  ```Docker
+  COPY ["Pipfile","Pipfile.lock","./"]
+  ```
+- We install and open our pipenv to your 'main system' python inside the image
+  ```Docker
+  RUN pipenv install --system --deploy
+  ```
+- We copy into our docker image the prediction script and the bin model
+  ```Docker
+  COPY ["predict.py","lin_reg.bin","./"]
+  ```
+- We expose the port 9696 so that we tell that this port should be open
+  ```Docker
+  EXPOSE 9696
+  ```
+- We tell docker to run gunicorn
+  ```Docker
+  ENTRYPOINT ["gunicorn","--bind=0.0.0.0:9696","predict:app"]
+  ```
+
+### Building the docker image
+To build the Docker image simply run:
+```bash
+docker build -t ride-duration-prediction-service:v1 .
+```
+
+Where -t is just the flag for a tag, and the `.` means that its the folder we are currently in.
+
+### Running image in interactive mode
+We can now run the Docker image in interactive mode by adding the `-it` tag, by specifying to `--rm` remove the image after we are done, and to map the port `-p` 9696 of the host machine on the port 9696 on the container.
+```bash
+docker run -it --rm -p 9696:9696 ride-duration-prediction-service:v1
+```
+
+Now when we run `test.py` it will use the Docker image instead of straight up gunicorn or our local Flask.
 
 # NOTES:
 - to shorten the long prompt on the terminal, simply run:
