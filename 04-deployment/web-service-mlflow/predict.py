@@ -3,18 +3,48 @@ from flask import Flask, request, jsonify
 import mlflow
 from mlflow.tracking import MlflowClient
 
-RUN_ID = 'dadfadfas' #update this later
-MLFLOW_TRACKING_URI = '127.0.0.1:5000'
+'''
+NOTE: 
+We are loading saved models and preprocessores from the
+02-experiment-tracking module, where we used MLFlows UI
+and we manually asked it to save the model and the preprocessor
+via artifact logging.
+
+To enter the db, simply change the working folder to:
+MLOps_studies/02-experiment-tracking/
+
+and then run the following to startup mlflow:
+mlflow ui --backend-store-uri sqlite:///mlflow.db
+
+once that is done check the UI in:
+http://127.0.0.1:5000
+
+in there you can find that the only run that has both the model
+and the preprocessor is glamorous-turtle-248
+also known as RUN_ID 0b983bbfdc7148a3951d7bce9c997594
+
+NOTE: DONT FORGET TO ADD MLFLOW TO YOUR VENV
+go to 04-deployment/web-service-mlflow/ and run:
+pipenv install mlflow
+
+'''
+
+RUN_ID = '0b983bbfdc7148a3951d7bce9c997594' 
+MLFLOW_TRACKING_URI = 'http://127.0.0.1:5000'
+
+mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 
 # open the model registry and load the model
-logged_model = f'runs/{RUN_ID}/model'
+logged_model = f'runs:/{RUN_ID}/models_mlflow'
 model = mlflow.pyfunc.load_model(logged_model)
 
 # open the artifacts to download the dictionary vectorizer
 client = MlflowClient(tracking_uri=MLFLOW_TRACKING_URI)
-path = client.download_artifacts(run_id=RUN_ID,path='dict_vectorizer.bin')
+path = client.download_artifacts(run_id=RUN_ID,path='preprocessor.b')
 with open(path,'rb') as f_out:
     dv = pickle.load(f_out)
+
+print(f'downloading dict vectorizer to {path}')
 
 # create function to prepare features
 # we concatenate the categoricals and leave the numerical as is
