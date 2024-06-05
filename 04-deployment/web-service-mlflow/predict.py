@@ -4,24 +4,21 @@ import mlflow
 from mlflow.tracking import MlflowClient
 
 '''
-NOTE: 
-We are loading saved models and preprocessores from the
-02-experiment-tracking module, where we used MLFlows UI
-and we manually asked it to save the model and the preprocessor
+We are loading saved models and preprocessores generated after 
+running random-forest.ipynb, where we used MLFlows server
+and we manually asked it to save the model and the dv
 via artifact logging.
 
-To enter the db, simply change the working folder to:
-MLOps_studies/02-experiment-tracking/
-
-and then run the following to startup mlflow:
-mlflow ui --backend-store-uri sqlite:///mlflow.db
+Simply run the following to startup mlflow:
+mlflow server --backend-store-uri=sqlite:///mlflow.db 
+--default-artifact-root=./artifacts_local/
 
 once that is done check the UI in:
 http://127.0.0.1:5000
 
-in there you can find that the only run that has both the model
-and the preprocessor is glamorous-turtle-248
-also known as RUN_ID 0b983bbfdc7148a3951d7bce9c997594
+in there you can find a run that has both the model
+and the preprocessor : smiling-elk-458
+also known as RUN_ID 08fa17176f5c4b789a1e9461bdfd88aa
 
 NOTE: DONT FORGET TO ADD MLFLOW TO YOUR VENV
 go to 04-deployment/web-service-mlflow/ and run:
@@ -29,18 +26,18 @@ pipenv install mlflow
 
 '''
 
-RUN_ID = '0b983bbfdc7148a3951d7bce9c997594' 
+RUN_ID = '08fa17176f5c4b789a1e9461bdfd88aa' 
 MLFLOW_TRACKING_URI = 'http://127.0.0.1:5000'
 
 mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 
 # open the model registry and load the model
-logged_model = f'runs:/{RUN_ID}/models_mlflow'
+logged_model = f'runs:/{RUN_ID}/model'
 model = mlflow.pyfunc.load_model(logged_model)
 
 # open the artifacts to download the dictionary vectorizer
 client = MlflowClient(tracking_uri=MLFLOW_TRACKING_URI)
-path = client.download_artifacts(run_id=RUN_ID,path='preprocessor.b')
+path = client.download_artifacts(run_id=RUN_ID,path='dict_vectorizer.bin')
 with open(path,'rb') as f_out:
     dv = pickle.load(f_out)
 
@@ -75,7 +72,8 @@ def predict_endpoint():
     pred = predict(features)
     # report it out
     result = {
-        'duration': pred
+        'duration': pred,
+        'model_version': RUN_ID
     }
     return jsonify(result)
 
