@@ -9,4 +9,4 @@ models/
 02-experiment-tracking/homework/artifacts_local/
 02-experiment-tracking/homework/mlruns/
 02-experiment-tracking/homework/output/
-
+04-deployment/web-service-mlflow/artifacts_local/
