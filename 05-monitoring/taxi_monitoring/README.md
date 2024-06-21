@@ -288,3 +288,37 @@ Prefect: http://localhost:4200/
 Postgras/adminer: http://localhost:8080/
 Grafana: http://localhost:3000/
 
+### save the dashboard
+We first create a new config file named `grafana_dashboards.yaml`
+the file has default options, the main ones to change are:
+-  a unique dashboard name
+-  the path to dashboards
+
+So we then create the directory `dashboards` and add a file json file `data_drift.json` for grafana to store panel configs.
+
+Make sure that `docker-compose.yml` contains the following volume options:
+
+```yaml
+grafana:
+    volumes:
+      - ./config/grafana_datasources.yaml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
+      - ./config/grafana_dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml:ro
+      - ./dashboards:/opt/grafana/dashboards
+```
+
+Basically
+1. Go to grafana and make the dashboard you like
+2. go to **dashboard settings**
+3. Go to the **JSON model** tab
+4. Copy the configuration of the dashboard
+5. Paste it in the `data_drift.json` file and save
+6. Stop and start docker again
+7. You should see your dashboard saved
+
+After this there is no need to create your panels again, this saved dashboard will automatically have the config set up and the data will be just read in accordingly.
+
+### Debugging
+the whole point of this is to figure out where things go wrong and go fix the problem.
+We can assume we have some threshold of what is a good prediction drift.
+Like, maybe it was 0.195 and on february 2nd the prediction drift went up to 0.198, so it is advisable to analyze the data of feb 2nd through jupyter to debug properly.
+
