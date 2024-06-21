@@ -168,3 +168,76 @@ When you have only 1 report, the dashboard will only plot a single point.
 We just create a secondary report and change the date to jan 29.
 
 We add the report to the project, and now we should see a second point plotted on the dashboard alongside a report for jan 29 on the list inside the ui
+
+
+## Exiting docker
+simply run
+
+```bash
+docker compose down
+```
+
+to close down the docker container and continue working with other stuff.
+
+## graphana
+- We start with a script to calculate some metrics that we care about.
+- Then we create a tool to run that metric script every now and then and load stuff into the database.
+- We also will have libraries for logging and stuff
+
+### calculating metrics
+We created the `dummy_metrics_calculation.py` script, which:
+- creates a db and a table
+- creates 3 random variables for funsies
+- writes a 100 of those alongside a timestamp every 10 secs
+
+in all of this the script is contacting the sql table using the credentials set up for postgres in the `docker-compose.yml` file:
+
+```python
+with psycopg.connect("host=localhost port=5432 user=postgres password=example", autocommit=True) as conn: # we connect to host
+```
+
+To run this file we need our docker container, so set it up via
+```bash
+docker-compose up --build
+```
+
+and then test the script via
+
+```bash
+python dummy_metrics_calculation.py
+```
+Every 10 secs it will tell you that data will be sent.
+
+Once it completes, go to http://localhost:8080/ and on the login fill the following:
+- system: postgresQL
+- server: db
+- username: postgres
+- password: example
+- database: test
+
+You should see a table inside with dummy metrics.
+
+Then go to the dashboard in graphana http://localhost:3000
+
+and now you can create a new dashboard in grafana using the postgreSQL db as input
+
+#### NOTE:
+Make sure your dashboard yml file contains the following:
+```yaml
+datasources:
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    url: db:5432
+    database: test
+    user: postgres
+    secureJsonData:
+      password: 'example'
+    jsonData:
+      sslmode: 'disable'
+      database: test
+```
+
+The original has a typo on url and has the database missing on jsondata
+
+ 
