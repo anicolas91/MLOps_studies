@@ -185,6 +185,8 @@ to close down the docker container and continue working with other stuff.
 - We also will have libraries for logging and stuff
 
 ### calculating metrics
+
+#### Dummy metrics
 We created the `dummy_metrics_calculation.py` script, which:
 - creates a db and a table
 - creates 3 random variables for funsies
@@ -240,4 +242,30 @@ datasources:
 
 The original has a typo on url and has the database missing on jsondata
 
- 
+#### Evidently metrics
+
+We created the `evidently_metrics_calculation.py` script, which:
+- creates a db and a table
+- creates an evidently report and extracts 3 metrics from it
+- grabs the feb 2022 data and evaluates the metric day by day for a total of 28 points
+
+It basically just updates the `calculate_metrics_postgresql` function by establishing the following metrics as output:
+
+```python
+#1st metric: prediction drift score
+prediction_drift = result['metrics'][0]['result']['drift_score']
+# 2nd metric: no of predicted columns
+num_drifted_columns = result['metrics'][1]['result']['number_of_drifted_columns']
+# 3rd metric: no of missing values
+share_missing_values = result['metrics'][2]['result']['current']['share_of_missing_values']
+```
+
+where `result` is the dictionarized version of the report. For more details refer to the jupyter notebook.
+
+#### Prefect
+When using prefect as a pileline you essentially add flags such that:
+- fcns --> tasks
+- main --> flow
+
+
+
