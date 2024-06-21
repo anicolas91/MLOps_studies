@@ -322,3 +322,4 @@ the whole point of this is to figure out where things go wrong and go fix the pr
 We can assume we have some threshold of what is a good prediction drift.
 Like, maybe it was 0.195 and on february 2nd the prediction drift went up to 0.198, so it is advisable to analyze the data of feb 2nd through jupyter to debug properly.
 
+Please refer to the `debugging_nyc_taxi_data.ipynb` for a look on how Evidently can readily calculate and report tests and metrics to indicate what is wrong and to examine the data in depth.
