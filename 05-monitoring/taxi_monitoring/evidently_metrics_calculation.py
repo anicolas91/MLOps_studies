@@ -14,6 +14,9 @@ from evidently.report import Report
 from evidently import ColumnMapping
 from evidently.metrics import ColumnDriftMetric, DatasetDriftMetric, DatasetMissingValuesMetric
 
+# import prefect for orchestration
+from prefect import task, flow
+
 # we specify the loggin option and then create the database together with the table
 # we specify how to log the data, with time, level and message
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]: %(message)s")
@@ -35,6 +38,8 @@ create table dummy_metrics(
 	share_missing_values float
 )
 """
+
+#NOTE: ideally youd have a fcn for the reading of the data so that prefect can keep tabs and stuff
 
 # read the reference data and model
 reference_data = pd.read_parquet('data/reference.parquet')
@@ -68,6 +73,7 @@ report = Report(
 )
 
 # preparation fcn
+@task
 def prep_db():
 	with psycopg.connect("host=localhost port=5432 user=postgres password=example", autocommit=True) as conn: # we connect to host
 		res = conn.execute("SELECT 1 FROM pg_database WHERE datname='test'") # this is an sql query
@@ -78,6 +84,7 @@ def prep_db():
 
 # we calculate ACTUAL metrics fcn
 # you need to have a report first from which to obtain the metrics
+@task
 def calculate_metrics_postgresql(curr, i): # we insert values in the curr position oh the cursor
 	# set up the current data, where i is the number of day in a month... were calculating the values month by month
 	current_data = raw_data[(raw_data.lpep_pickup_datetime >= (begin + datetime.timedelta(i))) &
@@ -104,7 +111,8 @@ def calculate_metrics_postgresql(curr, i): # we insert values in the curr positi
 	)
 
 # fcn to iterate a number of times in a cycle
-def main():
+@flow
+def batch_monitoring_backfill():
 	prep_db() # just preps db and table
 	last_send = datetime.datetime.now() - datetime.timedelta(seconds=10) # time of last sent
 	with psycopg.connect("host=localhost port=5432 dbname=test user=postgres password=example", autocommit=True) as conn: # connected to db w credentials
@@ -122,4 +130,4 @@ def main():
 
 
 if __name__ == '__main__':
-	main()
+	batch_monitoring_backfill()

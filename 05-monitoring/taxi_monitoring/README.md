@@ -267,5 +267,24 @@ When using prefect as a pileline you essentially add flags such that:
 - fcns --> tasks
 - main --> flow
 
+To use prefect with this you need to:
+1. import prefect as a library into the script
+```python
+from prefect import task, flow
+```
 
+2. add the tags where needed
+3. activate the server:
+```bash
+prefect server start
+```
+4. run the python script:
+```bash
+python evidently_metrics_calculation.py
+```
+
+And basically look at the following addresses to evaluate different bits:
+Prefect: http://localhost:4200/
+Postgras/adminer: http://localhost:8080/
+Grafana: http://localhost:3000/
 
