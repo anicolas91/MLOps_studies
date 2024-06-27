@@ -1,19 +1,22 @@
-## Creating tests
+## Getting started
+We obtain the Pipfile and other files from the module 04, the streaming portion.
 
-- We install the python environment via
+We use the present Pipfile and Pipfile.lock to instantiate a new python env via:
 ```bash
 pipenv install
 ```
 
-Note that we changed scikit to *
-- we add to dev the pytest so we can create unit tests
+and we add pytest as a dev library via
 ```bash
 pipenv install --dev pytest
 ```
 
-- Check the env full path via
-```bash
-pipenv --venv
-```
+You should end up seeing on VS code, under the `>Python: select interpreter` the `code-xxxxxx` venv with python 3.9.6.
 
+If the venv looks odd, has issues locking, or is using the wrong python version, then you need to remove any preexisting venvs and start again.
+
+To remove simply run
+```bash
+pipenv --rm
+```
 
