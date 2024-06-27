@@ -20,3 +20,19 @@ To remove simply run
 pipenv --rm
 ```
 
+To run the pipenv simply do
+```bash
+pipenv shell
+```
+
+Also, if you already had the pipfile with the dev bit, then youll have to redo the install via
+```bash
+pipenv install --dev
+```
+
+Make sure then that you got python and pytest via
+```bash
+pipenv shell
+which python
+which pytest
+```
