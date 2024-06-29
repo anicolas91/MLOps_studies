@@ -103,7 +103,7 @@ How many rows should be there in the expected dataframe?
 
 ## Answer
 * 1
-* **2**
+* **2** <--
 * 3
 * 4
 
@@ -135,11 +135,39 @@ aws s3 ls
 
 In both cases we should adjust commands for localstack. What option do we need to use for such purposes?
 
+## Answer
+
 * `--backend-store-uri`
 * `--profile`
-* `--endpoint-url`
+* **`--endpoint-url`** <--
 * `--version`
 
+We first move to the `tests/` folder and make sure we have a subfolder there `model` with the model we're going to use.
+
+Then we export important values that the `docker-compose.yaml` file wants:
+```bash
+export LOCAL_IMAGE_NAME="mycoolimage"
+export PREDICTIONS_STREAM_NAME="nycmarch2023predictions"
+```
+
+Then we do
+```bash
+docker-compose up
+```
+
+And with docker running, we can now use AWS dummy services via localstack (in another terminal tab).
+
+For that, we need to add the endpoint url like so:
+
+```bash
+aws --endpoint-url=http://localhost:4566 s3 mb s3://nyc-duration
+```
+
+and
+
+```bash
+aws --endpoint-url=http://localhost:4566 s3 ls
+```
 
 ## Make input and output paths configurable
 

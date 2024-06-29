@@ -1,0 +1,23 @@
+services:
+  backend:
+    image: ${LOCAL_IMAGE_NAME}
+    ports:
+      - "8080:8080"
+    environment:
+      - PREDICTIONS_STREAM_NAME=${PREDICTIONS_STREAM_NAME}
+      - RUN_ID=Test123
+      - AWS_DEFAULT_REGION=us-east-1
+      - MODEL_LOCATION=/app/model
+      - S3_ENDPOINT_URL=http://s3:4566/ # we use this locally
+      - AWS_ACCESS_KEY_ID=abc
+      - AWS_SECRET_ACCESS_KEY=xyz
+    volumes:
+      - "./model:/app/model"
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+
+#note: for localhost anything is basically the htttp://servicename:4566/
