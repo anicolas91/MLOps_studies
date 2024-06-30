@@ -1,19 +1,57 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import os
 import sys
 import pickle
 import pandas as pd
 
-def read_data(filename,categorical):
+def read_data(filename,categorical=None):
     '''
     This function reads the parquet data and prepares it
     '''
-    df = pd.read_parquet(filename)
-    df = prepare_data(df,categorical)
+    S3_ENDPOINT_URL = os.getenv('S3_ENDPOINT_URL')
+
+    options = None
+
+    if S3_ENDPOINT_URL is not None:
+        options = {
+            'client_kwargs': {
+                'endpoint_url': S3_ENDPOINT_URL
+            }
+        }       
+
+    df = pd.read_parquet(filename, storage_options=options)  
+
+    if categorical is not None:
+        df = prepare_data(df,categorical)
 
     return df
 
+def save_data(filename,df):
+    '''
+    This function saves the parquet data
+    '''
+    S3_ENDPOINT_URL = os.getenv('S3_ENDPOINT_URL')
+
+    options = None
+
+    if S3_ENDPOINT_URL is not None:
+        options = {
+            'client_kwargs': {
+                'endpoint_url': S3_ENDPOINT_URL
+            }
+        }  
+
+    df.to_parquet(
+        filename,
+        engine='pyarrow',
+        compression=None,
+        index=False,
+        storage_options=options
+    )
+
+    return None
 
 def prepare_data(df,categorical):
     '''
@@ -28,13 +66,30 @@ def prepare_data(df,categorical):
     
     return df
 
+def get_input_path(year, month):
+    '''
+    gets input path name where year and month are inputs
+    '''
+    default_input_pattern = 'https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{year:04d}-{month:02d}.parquet'
+    input_pattern = os.getenv('INPUT_FILE_PATTERN', default_input_pattern)
+    return input_pattern.format(year=year, month=month)
+
+
+def get_output_path(year, month):
+    '''
+    gets output path name where year and month are inputs
+    '''
+    default_output_pattern = 's3://nyc-duration/out/year={year:04d}/month={month:02d}/predictions.parquet'
+    output_pattern = os.getenv('OUTPUT_FILE_PATTERN', default_output_pattern)
+    return output_pattern.format(year=year, month=month)
+
 
 def main(year,month):
     '''
     Main function that does all the reading of the data, prediction, and formatting
     '''
-    input_file = f'https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{year:04d}-{month:02d}.parquet'
-    output_file = f'taxi_type=yellow_year={year:04d}_month={month:02d}.parquet'
+    input_file = get_input_path(year, month)
+    output_file = get_output_path(year, month)
     categorical = ['PULocationID', 'DOLocationID']
 
     with open('model.bin', 'rb') as f_in:
@@ -56,12 +111,12 @@ def main(year,month):
     df_result['ride_id'] = df['ride_id']
     df_result['predicted_duration'] = y_pred
 
-
-    df_result.to_parquet(output_file, engine='pyarrow', index=False)
+    # df_result.to_parquet(output_file, engine='pyarrow', index=False)
+    save_data(filename=output_file,df=df_result)
 
     return None
 
 if __name__ == "__main__":
     year = int(sys.argv[1])
     month = int(sys.argv[2])
-    main(year,month)
+    main(year=year, month=month)
