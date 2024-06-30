@@ -144,15 +144,17 @@ In both cases we should adjust commands for localstack. What option do we need t
 
 We first move to the `tests/` folder and make sure we have a subfolder there `model` with the model we're going to use.
 
-Then we export important values that the `docker-compose.yaml` file wants:
+Then we export important values that the `docker-compose.yaml` file wants (which includes building the docker image on the homework folder):
 ```bash
-export LOCAL_IMAGE_NAME="mycoolimage"
-export PREDICTIONS_STREAM_NAME="nycmarch2023predictions"
+LOCAL_TAG=`date +"%Y-%m-%d-%H-%M"`
+export LOCAL_IMAGE_NAME="stream-model-duration:${LOCAL_TAG}"
+docker build -t ${LOCAL_IMAGE_NAME} ..
+export PREDICTIONS_STREAM_NAME="NYCpredictions"
 ```
 
 Then we do
 ```bash
-docker-compose up
+docker-compose up s3
 ```
 
 And with docker running, we can now use AWS dummy services via localstack (in another terminal tab).
@@ -169,6 +171,16 @@ and
 aws --endpoint-url=http://localhost:4566 s3 ls
 ```
 
+NOTE: if dont have `aws` then `pip install awscli`
+
+NOTE 2: If make bucket fails, just run:
+```bash
+aws --endpoint-url http://localhost:4566 configure
+```
+
+and set up the ids and secret keys and stuff, same ones listed in yaml it does not matter.
+
+
 ## Make input and output paths configurable
 
 Right now the input and output paths are hardcoded, but we want
@@ -179,7 +191,7 @@ variables. Let's do that:
 
 
 ```bash
-export INPUT_FILE_PATTERN="s3://nyc-duration/in/{year:04d}-{month:02d}.parquet"
+export INPUT_FILE_t6PATTERN="s3://nyc-duration/in/{year:04d}-{month:02d}.parquet"
 export OUTPUT_FILE_PATTERN="s3://nyc-duration/out/{year:04d}-{month:02d}.parquet"
 ```
 
@@ -257,10 +269,39 @@ df_input.to_parquet(
 
 What's the size of the file?
 
-* 3620
+## Answer
+
+* **3620** <--
 * 23620
 * 43620
 * 63620
+
+We need to do the following in bash before running the integration test:
+```bash
+docker-compose up s3
+```
+
+and on a separate terminal run:
+```bash
+export S3_ENDPOINT_URL="http://localhost:4566"
+export INPUT_FILE_PATTERN="s3://nyc-duration/in/{year:04d}-{month:02d}.parquet"
+export OUTPUT_FILE_PATTERN="s3://nyc-duration/out/{year:04d}-{month:02d}.parquet"
+
+aws --endpoint-url=http://localhost:4566 s3 mb s3://nyc-duration
+aws --endpoint-url=http://localhost:4566 s3 ls
+```
+
+Then with this you can run:
+```bash
+python integration_test.py
+```
+
+And then you can actually check manually if the files exist via:
+```bash
+aws --endpoint-url=http://localhost:4566 s3 ls s3://nyc-duration/ --recursive
+```
+
+and see the size of the 'input' file which is the one containing the fake df dataset.
 
 Note: it's important to use the code from the snippet for saving
 the file. Otherwise the size may be different depending on the OS,
@@ -288,11 +329,14 @@ verify the result is correct.
 
 What's the sum of predicted durations for the test dataframe?
 
+## Answer
+
 * 13.08
-* 36.28
+* **36.28** <--
 * 69.28
 * 81.08
 
+After running `python integration_test.py` we get a printout of the sum of durations, alongside a notification that 'all good' when it compares against the expected value.
 
 ## Running the test (ungraded)
 
