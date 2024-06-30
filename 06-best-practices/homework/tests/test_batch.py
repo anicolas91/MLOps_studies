@@ -2,8 +2,6 @@ from utils import dt
 import pandas as pd
 import batch
 
-from datetime import datetime
-
 def test_prepare_data():
     data = [
     (None, None, dt(1, 1), dt(1, 10)), # 9 mins difference

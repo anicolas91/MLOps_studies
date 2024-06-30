@@ -13,7 +13,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=xyz
     volumes:
       - "./model:/app/model"
-  localstack:
+  s3:
     image: localstack/localstack
     ports:
       - "4566:4566"
